@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Shield Border Gold -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,23 C68,23 81,28 81,28 C81,58 70,76 54,85 C38,76 27,58 27,28 C27,28 40,23 54,23 Z" />
+    <!-- Inner Shield Charcoal Background -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M54,28 C64,28 75,32 75,32 C75,55 65,71 54,79 C43,71 33,55 33,32 C33,32 44,28 54,28 Z" />
+    <!-- Golden Clash Crown / Star Emblems -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M44,48 L54,39 L64,48 L60,62 L48,62 Z" />
+    <!-- Sword Blade / Crest Center -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M52,36 L56,36 L56,66 L52,66 Z" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M48,64 L60,64 L60,67 L48,67 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M53,67 L55,67 L55,71 L53,71 Z" />
+    <!-- Tactical Analytics HUD Accents -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M40,36 L43,36 L43,38 L40,38 Z M65,36 L68,36 L68,38 L65,38 Z" />
+</vector>

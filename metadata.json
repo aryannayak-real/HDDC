@@ -1,0 +1,6 @@
+{
+  "name": "HDDC",
+  "description": "HDDC (Home Dashboard for Clash) — Clash of Clans intelligence platform for player tracking, clan analytics, war center, CWL scouting, and calculators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
