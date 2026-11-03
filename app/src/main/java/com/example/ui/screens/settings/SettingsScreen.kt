@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.util.InputDeduplicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -193,7 +194,7 @@ fun SettingsScreen(
 
                 OutlinedTextField(
                     value = apiKeyInput,
-                    onValueChange = { apiKeyInput = it },
+                    onValueChange = { apiKeyInput = InputDeduplicator.filter(apiKeyInput, it) },
                     placeholder = {
                         Text(
                             text = if (hasSavedApiKey) "•••••••••••••••••••••••••••••••• (Leave blank to keep existing)" else "Paste Supercell API Token",
@@ -264,7 +265,7 @@ fun SettingsScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = proxyHostInput,
-                            onValueChange = { proxyHostInput = it },
+                            onValueChange = { proxyHostInput = InputDeduplicator.filter(proxyHostInput, it) },
                             label = { Text("Proxy Host / IP") },
                             modifier = Modifier.weight(2f),
                             singleLine = true,
@@ -272,7 +273,7 @@ fun SettingsScreen(
                         )
                         OutlinedTextField(
                             value = proxyPortInput,
-                            onValueChange = { proxyPortInput = it },
+                            onValueChange = { proxyPortInput = InputDeduplicator.filter(proxyPortInput, it) },
                             label = { Text("Port") },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
@@ -283,7 +284,7 @@ fun SettingsScreen(
 
                     OutlinedTextField(
                         value = proxyUserInput,
-                        onValueChange = { proxyUserInput = it },
+                        onValueChange = { proxyUserInput = InputDeduplicator.filter(proxyUserInput, it) },
                         label = { Text("Proxy Username") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -292,7 +293,7 @@ fun SettingsScreen(
 
                     OutlinedTextField(
                         value = proxyPassInput,
-                        onValueChange = { proxyPassInput = it },
+                        onValueChange = { proxyPassInput = InputDeduplicator.filter(proxyPassInput, it) },
                         label = { Text(if (hasSavedProxyPass) "Proxy Password (Configured - Blank to Keep)" else "Proxy Password") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,

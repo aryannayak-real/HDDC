@@ -86,6 +86,7 @@ import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import com.example.util.ClashCalculators
 import com.example.util.ClashPlannerData
+import com.example.util.InputDeduplicator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -626,14 +627,14 @@ private fun BuilderSchedulerSection(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = targetName,
-                        onValueChange = { targetName = it },
+                        onValueChange = { targetName = InputDeduplicator.filter(targetName, it) },
                         label = { Text("Building / Troop Name (e.g. Archer Queen)") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary)
                     )
                     OutlinedTextField(
                         value = targetLevelStr,
-                        onValueChange = { targetLevelStr = it },
+                        onValueChange = { targetLevelStr = InputDeduplicator.filter(targetLevelStr, it) },
                         label = { Text("Target Level") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -642,7 +643,7 @@ private fun BuilderSchedulerSection(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = daysStr,
-                            onValueChange = { daysStr = it },
+                            onValueChange = { daysStr = InputDeduplicator.filter(daysStr, it) },
                             label = { Text("Days") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -650,7 +651,7 @@ private fun BuilderSchedulerSection(
                         )
                         OutlinedTextField(
                             value = hoursStr,
-                            onValueChange = { hoursStr = it },
+                            onValueChange = { hoursStr = InputDeduplicator.filter(hoursStr, it) },
                             label = { Text("Hours") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -754,7 +755,7 @@ private fun EquipmentOrePlannerSection() {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = currentLevelStr,
-                    onValueChange = { currentLevelStr = it },
+                    onValueChange = { currentLevelStr = InputDeduplicator.filter(currentLevelStr, it) },
                     label = { Text("Current Level") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -762,7 +763,7 @@ private fun EquipmentOrePlannerSection() {
                 )
                 OutlinedTextField(
                     value = targetLevelStr,
-                    onValueChange = { targetLevelStr = it },
+                    onValueChange = { targetLevelStr = InputDeduplicator.filter(targetLevelStr, it) },
                     label = { Text("Target Level") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -914,7 +915,7 @@ private fun UpgradeTimeCalculator() {
 
         OutlinedTextField(
             value = baseDaysStr,
-            onValueChange = { baseDaysStr = it },
+            onValueChange = { baseDaysStr = InputDeduplicator.filter(baseDaysStr, it) },
             label = { Text("Base Upgrade Time (Days)") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -947,7 +948,7 @@ private fun UpgradeTimeCalculator() {
 
         OutlinedTextField(
             value = potionsCountStr,
-            onValueChange = { potionsCountStr = it },
+            onValueChange = { potionsCountStr = InputDeduplicator.filter(potionsCountStr, it) },
             label = { Text("Builder Potions (Saves 9h each)") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1043,7 +1044,7 @@ private fun WallResourceCalculator() {
 
         OutlinedTextField(
             value = wallCountStr,
-            onValueChange = { wallCountStr = it },
+            onValueChange = { wallCountStr = InputDeduplicator.filter(wallCountStr, it) },
             label = { Text("Number of Wall Pieces") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1105,7 +1106,7 @@ private fun WarTiebreakerCalculator() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = myStarsStr,
-                onValueChange = { myStarsStr = it },
+                onValueChange = { myStarsStr = InputDeduplicator.filter(myStarsStr, it) },
                 label = { Text("Your Clan Stars") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1113,7 +1114,7 @@ private fun WarTiebreakerCalculator() {
             )
             OutlinedTextField(
                 value = myDestrStr,
-                onValueChange = { myDestrStr = it },
+                onValueChange = { myDestrStr = InputDeduplicator.filter(myDestrStr, it) },
                 label = { Text("Your Destr %") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1124,7 +1125,7 @@ private fun WarTiebreakerCalculator() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = oppStarsStr,
-                onValueChange = { oppStarsStr = it },
+                onValueChange = { oppStarsStr = InputDeduplicator.filter(oppStarsStr, it) },
                 label = { Text("Opponent Stars") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1132,7 +1133,7 @@ private fun WarTiebreakerCalculator() {
             )
             OutlinedTextField(
                 value = oppDestrStr,
-                onValueChange = { oppDestrStr = it },
+                onValueChange = { oppDestrStr = InputDeduplicator.filter(oppDestrStr, it) },
                 label = { Text("Opponent Destr %") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1191,7 +1192,7 @@ private fun DonationHealthCalculator() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = sentStr,
-                onValueChange = { sentStr = it },
+                onValueChange = { sentStr = InputDeduplicator.filter(sentStr, it) },
                 label = { Text("Troops Donated") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1199,7 +1200,7 @@ private fun DonationHealthCalculator() {
             )
             OutlinedTextField(
                 value = recvStr,
-                onValueChange = { recvStr = it },
+                onValueChange = { recvStr = InputDeduplicator.filter(recvStr, it) },
                 label = { Text("Troops Received") },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

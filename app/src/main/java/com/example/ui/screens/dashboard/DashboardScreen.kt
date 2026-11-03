@@ -71,6 +71,7 @@ import com.example.ui.theme.SurfaceCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.util.InputDeduplicator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -117,7 +118,7 @@ fun DashboardScreen(
 
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it.uppercase() },
+                    onValueChange = { searchQuery = InputDeduplicator.filter(searchQuery, it).uppercase() },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Enter Player or Clan Tag (e.g. #2PP)", color = TextMuted, fontSize = 13.sp) },
                     leadingIcon = {

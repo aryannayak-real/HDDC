@@ -81,6 +81,7 @@ import com.example.ui.theme.SurfaceCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.util.InputDeduplicator
 
 @Composable
 fun ClanScreen(
@@ -119,7 +120,7 @@ fun ClanScreen(
         ) {
             OutlinedTextField(
                 value = searchInput,
-                onValueChange = { searchInput = it.uppercase() },
+                onValueChange = { searchInput = InputDeduplicator.filter(searchInput, it).uppercase() },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Clan Tag (e.g. #2PP)", color = TextMuted, fontSize = 13.sp) },
                 singleLine = true,

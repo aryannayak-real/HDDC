@@ -77,6 +77,7 @@ import com.example.ui.theme.SurfaceCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.util.InputDeduplicator
 
 @Composable
 fun WarScreen(
@@ -497,7 +498,7 @@ fun WarScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = memberName,
-                        onValueChange = { memberName = it },
+                        onValueChange = { memberName = InputDeduplicator.filter(memberName, it) },
                         label = { Text("Clan Mate Name") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -507,7 +508,7 @@ fun WarScreen(
                     )
                     OutlinedTextField(
                         value = targetBaseStr,
-                        onValueChange = { targetBaseStr = it },
+                        onValueChange = { targetBaseStr = InputDeduplicator.filter(targetBaseStr, it) },
                         label = { Text("Enemy Base # (e.g. 1-50)") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -517,7 +518,7 @@ fun WarScreen(
                     )
                     OutlinedTextField(
                         value = notes,
-                        onValueChange = { notes = it },
+                        onValueChange = { notes = InputDeduplicator.filter(notes, it) },
                         label = { Text("Strategy / Attack Notes") },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
