@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.LinearProgressIndicator
 import com.example.data.local.entity.PlayerSnapshotEntity
 import com.example.data.local.entity.TrackedPlayerEntity
 import com.example.data.model.PlayerDetail
@@ -81,6 +83,7 @@ import com.example.ui.theme.SurfaceCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.util.ClashPlannerData
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -93,6 +96,7 @@ fun PlayerScreen(
     onToggleTrack: (PlayerDetail) -> Unit,
     onRefresh: () -> Unit,
     onInspectClan: (String) -> Unit,
+    onNavigateToPlanner: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var searchInput by remember { mutableStateOf("") }
@@ -152,6 +156,38 @@ fun PlayerScreen(
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), color = BackgroundNavy, strokeWidth = 2.dp)
                 } else {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                }
+            }
+        }
+
+        // Quick Player Tags
+        val popularPlayerTags = listOf("#2PP", "#8QU8J9LP", "#2Y8G0CC", "#200CC")
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            item {
+                Text(
+                    text = "Quick:",
+                    fontSize = 11.sp,
+                    color = TextMuted,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            items(popularPlayerTags) { tag ->
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(SurfaceCardElevated)
+                        .clickable {
+                            searchInput = tag
+                            onSearch(tag)
+                        }
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(text = tag, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GoldBright)
                 }
             }
         }
@@ -354,6 +390,91 @@ fun PlayerScreen(
                                 donations = player.donations,
                                 received = player.donationsReceived
                             )
+                        }
+
+                        // Village Maturity & Clash Max Tracker Section
+                        item {
+                            val offense = remember(player) { ClashPlannerData.evaluatePlayerOffense(player) }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(SurfaceCard)
+                                    .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                                    .padding(14.dp)
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = "VILLAGE MATURITY & MAX TRACKER",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = GoldBright,
+                                                letterSpacing = 1.sp
+                                            )
+                                            Text(
+                                                text = offense.statusMessage,
+                                                fontSize = 12.sp,
+                                                color = TextSecondary
+                                            )
+                                        }
+                                        Text(
+                                            text = "${offense.overallPercent}%",
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = if (offense.overallPercent >= 90) GemGreen else GoldBright
+                                        )
+                                    }
+
+                                    LinearProgressIndicator(
+                                        progress = { offense.overallPercent / 100f },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(8.dp)
+                                            .clip(RoundedCornerShape(4.dp)),
+                                        color = GoldPrimary,
+                                        trackColor = BackgroundNavy
+                                    )
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Heroes", fontSize = 10.sp, color = TextMuted)
+                                            Text("${offense.heroesPercent}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DarkElixirPurple)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Troops", fontSize = 10.sp, color = TextMuted)
+                                            Text("${offense.troopsPercent}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = ElixirPink)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Spells", fontSize = 10.sp, color = TextMuted)
+                                            Text("${offense.spellsPercent}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanHUD)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Equipment", fontSize = 10.sp, color = TextMuted)
+                                            Text("${offense.equipmentPercent}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = GemGreen)
+                                        }
+                                    }
+
+                                    if (onNavigateToPlanner != null) {
+                                        Button(
+                                            onClick = onNavigateToPlanner,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(containerColor = SurfaceCardElevated),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text("Open 2026 Upgrade Planner & Builder Scheduler →", fontSize = 11.sp, color = GoldBright, fontWeight = FontWeight.SemiBold)
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         // Heroes Quick Preview

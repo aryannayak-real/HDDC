@@ -12,6 +12,8 @@ import com.example.data.model.ClanDetail
 import com.example.data.model.CurrentWar
 import com.example.data.model.CwlGroup
 import com.example.data.model.PlayerDetail
+import com.example.data.model.WarLogEntry
+import com.example.data.model.CapitalRaidSeason
 import com.example.data.remote.ClashApiClient
 import com.example.data.security.SecurityManager
 import com.example.util.TagValidator
@@ -273,6 +275,38 @@ class ClashRepository(
         )
     }
 
+    suspend fun fetchClanWarLog(clanTag: String): Result<List<WarLogEntry>> {
+        val settings = getSettings()
+        val apiKey = SecurityManager.decrypt(settings.apiKeyEncrypted)
+        val proxyPass = SecurityManager.decrypt(settings.proxyPasswordEncrypted)
+
+        return apiClient.getClanWarLog(
+            clanTag = TagValidator.normalize(clanTag),
+            apiKey = apiKey,
+            proxyHost = settings.proxyHost,
+            proxyPort = settings.proxyPort,
+            proxyUser = settings.proxyUsername,
+            proxyPass = proxyPass,
+            useProxy = settings.useProxy
+        )
+    }
+
+    suspend fun fetchCapitalRaidSeasons(clanTag: String): Result<List<CapitalRaidSeason>> {
+        val settings = getSettings()
+        val apiKey = SecurityManager.decrypt(settings.apiKeyEncrypted)
+        val proxyPass = SecurityManager.decrypt(settings.proxyPasswordEncrypted)
+
+        return apiClient.getCapitalRaidSeasons(
+            clanTag = TagValidator.normalize(clanTag),
+            apiKey = apiKey,
+            proxyHost = settings.proxyHost,
+            proxyPort = settings.proxyPort,
+            proxyUser = settings.proxyUsername,
+            proxyPass = proxyPass,
+            useProxy = settings.useProxy
+        )
+    }
+
     // War Attack Planner
     fun getWarAssignments(clanTag: String): Flow<List<WarAssignmentEntity>> {
         return database.warAssignmentDao().getAssignmentsForClan(clanTag)
@@ -347,5 +381,26 @@ class ClashRepository(
         } catch (e: Exception) {
             null
         }
+    }
+
+    // Active Builder & Lab Scheduling
+    val activeBuildersFlow: Flow<List<com.example.data.local.entity.ActiveBuilderEntity>> =
+        database.activeBuilderDao().getAllBuilders()
+
+    suspend fun saveActiveBuilder(builder: com.example.data.local.entity.ActiveBuilderEntity) {
+        database.activeBuilderDao().insertOrUpdate(builder)
+    }
+
+    suspend fun initDefaultBuilders() {
+        val defaultList = listOf(
+            com.example.data.local.entity.ActiveBuilderEntity(1, "Builder 1", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(2, "Builder 2", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(3, "Builder 3", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(4, "Builder 4", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(5, "Builder 5", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(6, "B.O.B / 6th Builder", "Idle", 0, 0.0, 0L, false),
+            com.example.data.local.entity.ActiveBuilderEntity(7, "Laboratory", "Idle", 0, 0.0, 0L, false)
+        )
+        database.activeBuilderDao().insertAll(defaultList)
     }
 }

@@ -14,6 +14,8 @@ import com.example.data.model.ClanDetail
 import com.example.data.model.CurrentWar
 import com.example.data.model.CwlGroup
 import com.example.data.model.PlayerDetail
+import com.example.data.model.WarLogEntry
+import com.example.data.model.CapitalRaidSeason
 import com.example.data.remote.ClashApiClient
 import com.example.data.repository.ClashRepository
 import com.example.data.security.SecurityManager
@@ -31,7 +33,7 @@ enum class AppNavTab(val title: String) {
     CLANS("Clans"),
     WAR("War & CWL"),
     ANALYTICS("Analytics"),
-    CALCULATORS("Calculators"),
+    CALCULATORS("Planner"),
     SETTINGS("Settings")
 }
 
@@ -90,6 +92,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _warAssignments = MutableStateFlow<List<WarAssignmentEntity>>(emptyList())
     val warAssignments: StateFlow<List<WarAssignmentEntity>> = _warAssignments.asStateFlow()
+
+    private val _clanWarLog = MutableStateFlow<List<WarLogEntry>>(emptyList())
+    val clanWarLog: StateFlow<List<WarLogEntry>> = _clanWarLog.asStateFlow()
+
+    private val _capitalRaidSeasons = MutableStateFlow<List<CapitalRaidSeason>>(emptyList())
+    val capitalRaidSeasons: StateFlow<List<CapitalRaidSeason>> = _capitalRaidSeasons.asStateFlow()
+
+    val activeBuilders: StateFlow<List<com.example.data.local.entity.ActiveBuilderEntity>> =
+        repository.activeBuildersFlow.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    init {
+        viewModelScope.launch {
+            repository.activeBuildersFlow.collect { list ->
+                if (list.isEmpty()) {
+                    repository.initDefaultBuilders()
+                }
+            }
+        }
+    }
 
     // Loading & Error States
     private val _isLoading = MutableStateFlow(false)
@@ -295,6 +320,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             )
 
+            repository.fetchClanWarLog(clanTag).fold(
+                onSuccess = { log ->
+                    _clanWarLog.value = log
+                },
+                onFailure = {
+                    _clanWarLog.value = emptyList()
+                }
+            )
+
+            repository.fetchCapitalRaidSeasons(clanTag).fold(
+                onSuccess = { seasons ->
+                    _capitalRaidSeasons.value = seasons
+                },
+                onFailure = {
+                    _capitalRaidSeasons.value = emptyList()
+                }
+            )
+
             repository.getWarAssignments(clanTag).collect { assignments ->
                 _warAssignments.value = assignments
             }
@@ -368,6 +411,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _errorMessage.value = "${result.message}: ${result.errorDetails ?: ""}"
             }
             _isLoading.value = false
+        }
+    }
+
+    // Builder & Lab Scheduler Actions
+    fun setBuilderUpgrade(slotId: Int, slotName: String, target: String, level: Int, hours: Double) {
+        viewModelScope.launch {
+            val finishTime = if (hours > 0) System.currentTimeMillis() + (hours * 3600 * 1000).toLong() else 0L
+            val builder = com.example.data.local.entity.ActiveBuilderEntity(
+                slotId = slotId,
+                slotName = slotName,
+                upgradeTarget = target.ifBlank { "Upgrade" },
+                targetLevel = level,
+                durationHours = hours,
+                finishTimeMillis = finishTime,
+                isBusy = true
+            )
+            repository.saveActiveBuilder(builder)
+        }
+    }
+
+    fun clearBuilder(slotId: Int, slotName: String) {
+        viewModelScope.launch {
+            val builder = com.example.data.local.entity.ActiveBuilderEntity(
+                slotId = slotId,
+                slotName = slotName,
+                upgradeTarget = "Idle",
+                targetLevel = 0,
+                durationHours = 0.0,
+                finishTimeMillis = 0L,
+                isBusy = false
+            )
+            repository.saveActiveBuilder(builder)
         }
     }
 }

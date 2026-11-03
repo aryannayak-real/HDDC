@@ -19,12 +19,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import android.widget.Toast
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -88,6 +94,8 @@ fun WarScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Live War Matchup, 1: Attack Log, 2: War Planner, 3: CWL League
     var showAddDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     Column(
         modifier = modifier
@@ -342,17 +350,51 @@ fun WarScreen(
                                     color = TextMuted
                                 )
                             }
-                            Button(
-                                onClick = { showAddDialog = true },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GoldPrimary,
-                                    contentColor = BackgroundNavy
-                                ),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Assign Base", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(
+                                    onClick = {
+                                        val planText = buildString {
+                                            appendLine("⚔️ HDDC CLAN WAR PLAN & ORDERS")
+                                            if (currentWar?.clan != null && currentWar.opponent != null) {
+                                                appendLine("Match: ${currentWar.clan.name} vs ${currentWar.opponent.name}")
+                                                appendLine("Score: ${currentWar.clan.stars} ⭐ (${String.format("%.1f", currentWar.clan.destructionPercentage)}%) vs ${currentWar.opponent.stars} ⭐ (${String.format("%.1f", currentWar.opponent.destructionPercentage)}%)")
+                                            }
+                                            appendLine("─────────────────────────")
+                                            appendLine("🎯 TARGET CALLS:")
+                                            if (warAssignments.isEmpty()) {
+                                                appendLine("No targets assigned yet.")
+                                            } else {
+                                                warAssignments.sortedBy { it.targetBaseNumber }.forEach { a ->
+                                                    appendLine("• Base #${a.targetBaseNumber}: ${a.assignedMemberName} [${a.status}] ${if (a.notes.isNotBlank()) "(${a.notes})" else ""}")
+                                                }
+                                            }
+                                            appendLine("─────────────────────────")
+                                            appendLine("Good luck Chiefs! Secure the 3-stars! 🛡️")
+                                            appendLine("Generated via HDDC Intelligence Platform")
+                                        }
+                                        clipboardManager.setText(AnnotatedString(planText))
+                                        Toast.makeText(context, "War Plan copied to clipboard for Discord / Chat!", Toast.LENGTH_SHORT).show()
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GoldBright)
+                                ) {
+                                    Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(13.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Copy Plan", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+
+                                Button(
+                                    onClick = { showAddDialog = true },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = GoldPrimary,
+                                        contentColor = BackgroundNavy
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Assign", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }

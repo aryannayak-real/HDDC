@@ -15,6 +15,10 @@ import com.example.data.model.PlayerDetail
 import com.example.data.model.UnitItem
 import com.example.data.model.WarAttack
 import com.example.data.model.WarClan
+import com.example.data.model.WarLogClan
+import com.example.data.model.WarLogEntry
+import com.example.data.model.CapitalRaidMember
+import com.example.data.model.CapitalRaidSeason
 import com.example.data.model.WarMember
 import com.example.util.TagValidator
 import kotlinx.coroutines.Dispatchers
@@ -325,6 +329,78 @@ class ClashApiClient {
                 val json = JSONObject(body)
                 val cwl = parseCwlGroup(json)
                 Result.success(cwl)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getClanWarLog(
+        clanTag: String,
+        apiKey: String,
+        proxyHost: String,
+        proxyPort: Int,
+        proxyUser: String,
+        proxyPass: String,
+        useProxy: Boolean
+    ): Result<List<WarLogEntry>> = withContext(Dispatchers.IO) {
+        val encodedTag = TagValidator.urlEncode(clanTag)
+        val url = "$baseApiUrl/clans/$encodedTag/warlog?limit=25"
+        val client = buildOkHttpClient(useProxy, proxyHost, proxyPort, proxyUser, proxyPass)
+
+        val request = Request.Builder()
+            .url(url)
+            .header("Authorization", "Bearer ${apiKey.trim()}")
+            .header("Accept", "application/json")
+            .build()
+
+        try {
+            client.newCall(request).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(
+                        Exception(formatHttpError(response.code, body, clanTag, "War Log"))
+                    )
+                }
+                val json = JSONObject(body)
+                val entries = parseWarLog(json)
+                Result.success(entries)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getCapitalRaidSeasons(
+        clanTag: String,
+        apiKey: String,
+        proxyHost: String,
+        proxyPort: Int,
+        proxyUser: String,
+        proxyPass: String,
+        useProxy: Boolean
+    ): Result<List<CapitalRaidSeason>> = withContext(Dispatchers.IO) {
+        val encodedTag = TagValidator.urlEncode(clanTag)
+        val url = "$baseApiUrl/clans/$encodedTag/capitalraidseasons?limit=10"
+        val client = buildOkHttpClient(useProxy, proxyHost, proxyPort, proxyUser, proxyPass)
+
+        val request = Request.Builder()
+            .url(url)
+            .header("Authorization", "Bearer ${apiKey.trim()}")
+            .header("Accept", "application/json")
+            .build()
+
+        try {
+            client.newCall(request).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(
+                        Exception(formatHttpError(response.code, body, clanTag, "Capital Raid Seasons"))
+                    )
+                }
+                val json = JSONObject(body)
+                val seasons = parseCapitalRaidSeasons(json)
+                Result.success(seasons)
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -672,6 +748,95 @@ class ClashApiClient {
         }
 
         return CwlGroup(state = state, season = season, clans = clans, rounds = rounds)
+    }
+
+    fun parseWarLog(json: JSONObject): List<WarLogEntry> {
+        val items = json.optJSONArray("items") ?: return emptyList()
+        val list = mutableListOf<WarLogEntry>()
+        for (i in 0 until items.length()) {
+            val obj = items.optJSONObject(i) ?: continue
+            val clanObj = obj.optJSONObject("clan") ?: JSONObject()
+            val oppObj = obj.optJSONObject("opponent") ?: JSONObject()
+
+            val clan = WarLogClan(
+                tag = clanObj.optNullableString("tag"),
+                name = clanObj.optNullableString("name"),
+                clanLevel = clanObj.optInt("clanLevel", 1),
+                attacks = clanObj.optInt("attacks", 0),
+                stars = clanObj.optInt("stars", 0),
+                destructionPercentage = clanObj.optDouble("destructionPercentage", 0.0),
+                expEarned = clanObj.optInt("expEarned", 0),
+                badgeUrls = clanObj.optJSONObject("badgeUrls")?.let { b ->
+                    BadgeUrls(b.optNullableString("small"), b.optNullableString("medium"), b.optNullableString("large"))
+                }
+            )
+
+            val opp = WarLogClan(
+                tag = oppObj.optNullableString("tag"),
+                name = oppObj.optNullableString("name"),
+                clanLevel = oppObj.optInt("clanLevel", 1),
+                attacks = oppObj.optInt("attacks", 0),
+                stars = oppObj.optInt("stars", 0),
+                destructionPercentage = oppObj.optDouble("destructionPercentage", 0.0),
+                expEarned = oppObj.optInt("expEarned", 0),
+                badgeUrls = oppObj.optJSONObject("badgeUrls")?.let { b ->
+                    BadgeUrls(b.optNullableString("small"), b.optNullableString("medium"), b.optNullableString("large"))
+                }
+            )
+
+            list.add(
+                WarLogEntry(
+                    result = obj.optNullableString("result"),
+                    endTime = obj.optNullableString("endTime"),
+                    teamSize = obj.optInt("teamSize", 0),
+                    attacksPerMember = obj.optInt("attacksPerMember", 1),
+                    battleModifier = obj.optNullableString("battleModifier"),
+                    clan = clan,
+                    opponent = opp
+                )
+            )
+        }
+        return list
+    }
+
+    fun parseCapitalRaidSeasons(json: JSONObject): List<CapitalRaidSeason> {
+        val items = json.optJSONArray("items") ?: return emptyList()
+        val list = mutableListOf<CapitalRaidSeason>()
+        for (i in 0 until items.length()) {
+            val obj = items.optJSONObject(i) ?: continue
+            val membersArr = obj.optJSONArray("members") ?: JSONArray()
+            val memberList = mutableListOf<CapitalRaidMember>()
+            for (m in 0 until membersArr.length()) {
+                val mObj = membersArr.optJSONObject(m) ?: continue
+                memberList.add(
+                    CapitalRaidMember(
+                        tag = mObj.optString("tag", ""),
+                        name = mObj.optString("name", "Unknown Member"),
+                        attacks = mObj.optInt("attacks", 0),
+                        attackLimit = mObj.optInt("attackLimit", 5),
+                        bonusAttackLimit = mObj.optInt("bonusAttackLimit", 1),
+                        capitalResourcesLooted = mObj.optInt("capitalResourcesLooted", 0)
+                    )
+                )
+            }
+            memberList.sortByDescending { it.capitalResourcesLooted }
+
+            list.add(
+                CapitalRaidSeason(
+                    state = obj.optString("state", ""),
+                    startTime = obj.optString("startTime", ""),
+                    endTime = obj.optString("endTime", ""),
+                    capitalTotalLoot = obj.optInt("capitalTotalLoot", 0),
+                    raidsCompleted = obj.optInt("raidsCompleted", 0),
+                    totalAttacks = obj.optInt("totalAttacks", 0),
+                    enemyDistrictsDestroyed = obj.optInt("enemyDistrictsDestroyed", 0),
+                    offensiveReward = obj.optInt("offensiveReward", 0),
+                    defensiveReward = obj.optInt("defensiveReward", 0),
+                    members = memberList
+                )
+            )
+        }
+        return list
     }
 
     private fun JSONObject.optNullableString(key: String): String? =

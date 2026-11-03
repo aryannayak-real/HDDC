@@ -110,6 +110,9 @@ fun MainAppShell(viewModel: MainViewModel) {
     val currentWar by viewModel.currentWar.collectAsStateWithLifecycle()
     val cwlGroup by viewModel.cwlGroup.collectAsStateWithLifecycle()
     val warAssignments by viewModel.warAssignments.collectAsStateWithLifecycle()
+    val activeBuilders by viewModel.activeBuilders.collectAsStateWithLifecycle()
+    val clanWarLog by viewModel.clanWarLog.collectAsStateWithLifecycle()
+    val capitalRaidSeasons by viewModel.capitalRaidSeasons.collectAsStateWithLifecycle()
     val settings by viewModel.settingsState.collectAsStateWithLifecycle()
     val testResult by viewModel.connectionTestResult.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -208,7 +211,8 @@ fun MainAppShell(viewModel: MainViewModel) {
                     onSearch = { viewModel.searchPlayer(it) },
                     onToggleTrack = { viewModel.toggleTrackPlayer(it) },
                     onRefresh = { viewModel.refreshCurrentPlayer() },
-                    onInspectClan = { viewModel.searchClan(it) }
+                    onInspectClan = { viewModel.searchClan(it) },
+                    onNavigateToPlanner = { viewModel.switchTab(AppNavTab.CALCULATORS) }
                 )
 
                 AppNavTab.CLANS -> ClanScreen(
@@ -219,7 +223,9 @@ fun MainAppShell(viewModel: MainViewModel) {
                     onToggleTrack = { viewModel.toggleTrackClan(it) },
                     onRefresh = { viewModel.refreshCurrentClan() },
                     onSelectMember = { viewModel.searchPlayer(it) },
-                    onNavigateWar = { viewModel.switchTab(AppNavTab.WAR) }
+                    onNavigateWar = { viewModel.switchTab(AppNavTab.WAR) },
+                    warLog = clanWarLog,
+                    capitalRaids = capitalRaidSeasons
                 )
 
                 AppNavTab.WAR -> WarScreen(
@@ -245,7 +251,26 @@ fun MainAppShell(viewModel: MainViewModel) {
                     recentSnapshots = recentSnapshots
                 )
 
-                AppNavTab.CALCULATORS -> CalculatorsScreen()
+                AppNavTab.CALCULATORS -> CalculatorsScreen(
+                    selectedPlayer = selectedPlayer ?: trackedPlayers.firstOrNull()?.let { tp ->
+                        com.example.data.model.PlayerDetail(
+                            tag = tp.tag,
+                            name = tp.name,
+                            townHallLevel = tp.townHallLevel,
+                            expLevel = tp.expLevel,
+                            trophies = tp.trophies,
+                            bestTrophies = tp.bestTrophies,
+                            warStars = tp.warStars
+                        )
+                    },
+                    activeBuilders = activeBuilders,
+                    onSetBuilder = { slotId, slotName, target, level, hours ->
+                        viewModel.setBuilderUpgrade(slotId, slotName, target, level, hours)
+                    },
+                    onClearBuilder = { slotId, slotName ->
+                        viewModel.clearBuilder(slotId, slotName)
+                    }
+                )
 
                 AppNavTab.SETTINGS -> SettingsScreen(
                     settings = settings,
@@ -355,7 +380,7 @@ private fun HDDCBottomNavigationBar(
         NavItem(AppNavTab.CLANS, Icons.Default.Groups, "Clans"),
         NavItem(AppNavTab.WAR, Icons.Default.MilitaryTech, "War"),
         NavItem(AppNavTab.ANALYTICS, Icons.Default.Insights, "Analytics"),
-        NavItem(AppNavTab.CALCULATORS, Icons.Default.Calculate, "Calc"),
+        NavItem(AppNavTab.CALCULATORS, Icons.Default.Calculate, "Planner"),
         NavItem(AppNavTab.SETTINGS, Icons.Default.Settings, "Config")
     )
 

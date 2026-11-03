@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.data.local.dao.ActiveBuilderDao
 import com.example.data.local.dao.PersonalNoteDao
 import com.example.data.local.dao.SettingsDao
 import com.example.data.local.dao.SnapshotDao
 import com.example.data.local.dao.TrackedClanDao
 import com.example.data.local.dao.TrackedPlayerDao
 import com.example.data.local.dao.WarAssignmentDao
+import com.example.data.local.entity.ActiveBuilderEntity
 import com.example.data.local.entity.ClanSnapshotEntity
 import com.example.data.local.entity.PersonalNoteEntity
 import com.example.data.local.entity.PlayerSnapshotEntity
@@ -26,9 +28,10 @@ import com.example.data.local.entity.WarAssignmentEntity
         PlayerSnapshotEntity::class,
         ClanSnapshotEntity::class,
         WarAssignmentEntity::class,
-        PersonalNoteEntity::class
+        PersonalNoteEntity::class,
+        ActiveBuilderEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -38,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun snapshotDao(): SnapshotDao
     abstract fun warAssignmentDao(): WarAssignmentDao
     abstract fun personalNoteDao(): PersonalNoteDao
+    abstract fun activeBuilderDao(): ActiveBuilderDao
 
     companion object {
         @Volatile

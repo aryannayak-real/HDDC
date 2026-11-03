@@ -100,3 +100,14 @@ data class PersonalNoteEntity(
     val content: String,
     val updatedAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "active_builders")
+data class ActiveBuilderEntity(
+    @PrimaryKey val slotId: Int,
+    val slotName: String,
+    val upgradeTarget: String = "Idle",
+    val targetLevel: Int = 0,
+    val durationHours: Double = 0.0,
+    val finishTimeMillis: Long = 0L,
+    val isBusy: Boolean = false
+)

@@ -166,3 +166,47 @@ data class CwlGroup(
     val clans: List<CwlClan> = emptyList(),
     val rounds: List<CwlRound> = emptyList()
 )
+
+data class WarLogClan(
+    val tag: String? = null,
+    val name: String? = null,
+    val badgeUrls: BadgeUrls? = null,
+    val clanLevel: Int = 1,
+    val attacks: Int = 0,
+    val stars: Int = 0,
+    val destructionPercentage: Double = 0.0,
+    val expEarned: Int = 0
+)
+
+data class WarLogEntry(
+    val result: String? = null, // "win", "lose", "tie"
+    val endTime: String? = null,
+    val teamSize: Int = 0,
+    val attacksPerMember: Int = 1,
+    val battleModifier: String? = null,
+    val clan: WarLogClan,
+    val opponent: WarLogClan
+)
+
+data class CapitalRaidMember(
+    val tag: String,
+    val name: String,
+    val attacks: Int = 0,
+    val attackLimit: Int = 5,
+    val bonusAttackLimit: Int = 1,
+    val capitalResourcesLooted: Int = 0
+)
+
+data class CapitalRaidSeason(
+    val state: String = "",
+    val startTime: String = "",
+    val endTime: String = "",
+    val capitalTotalLoot: Int = 0,
+    val raidsCompleted: Int = 0,
+    val totalAttacks: Int = 0,
+    val enemyDistrictsDestroyed: Int = 0,
+    val offensiveReward: Int = 0,
+    val defensiveReward: Int = 0,
+    val members: List<CapitalRaidMember> = emptyList()
+)
+

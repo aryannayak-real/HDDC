@@ -254,7 +254,7 @@ fun DashboardScreen(
                         onClick = { onNavigateTab(AppNavTab.ANALYTICS) }
                     )
                     ModuleQuickButton(
-                        title = "Calculators",
+                        title = "Planner",
                         icon = Icons.Default.Calculate,
                         accent = GemGreen,
                         modifier = Modifier.weight(1f),

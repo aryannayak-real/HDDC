@@ -115,3 +115,18 @@ interface PersonalNoteDao {
     @Query("DELETE FROM personal_notes WHERE id = :id")
     suspend fun deleteNoteById(id: Long)
 }
+
+@Dao
+interface ActiveBuilderDao {
+    @Query("SELECT * FROM active_builders ORDER BY slotId ASC")
+    fun getAllBuilders(): Flow<List<com.example.data.local.entity.ActiveBuilderEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdate(builder: com.example.data.local.entity.ActiveBuilderEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(builders: List<com.example.data.local.entity.ActiveBuilderEntity>)
+
+    @Query("SELECT * FROM active_builders WHERE slotId = :slotId LIMIT 1")
+    suspend fun getBuilderById(slotId: Int): com.example.data.local.entity.ActiveBuilderEntity?
+}
